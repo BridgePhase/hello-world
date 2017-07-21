@@ -1,15 +1,29 @@
-def GIT_REPO_URL = "git@github.com:BridgePhase/hello-world.git";
-def GIT_BRANCH = "CI-DEV";
+def GIT_REPO_URL = "git@github.com:BridgePhase/hello-world.git"
+def GIT_BASE_BRANCH = "master"
+def GIT_BRANCH = "CI-DEV"
+
 
 node {
     printInfo("START BUILD")
 
     stage ("Clone Source Repository") {
         gitClone(GIT_REPO_URL, GIT_BRANCH)
+        mergeFrom(GIT_BRANCH, GIT_BASE_BRANCH, GIT_REPO_URL)
     }
 
     stage ("Test") {
-
+        pringInfo("UNIT TEST")
+        try {
+            gradleWrapper("test", "--continue --stacktrace")
+        } finally {
+            archive "build/reports/**"
+        }
+        pringInfo("INT TEST")
+        try {
+            gradleWrapper("intTest", "--stacktrace")
+        } finally {
+            archive "build/reports/intTest/**"
+        }
     }
 
     stage ("Merge") {
@@ -39,4 +53,46 @@ def gitClone(git_repo_url, git_branch) {
                     url: git_repo_url
             ]]
     ]
+}
+
+def mergeFrom(git_branch, git_base_branch, git_repo_url){
+    checkout changelog: false, poll: false, scm: [
+            $class: 'GitSCM',
+            branches: [[name: git_base_branch]],
+            doGenerateSubmoduleConfigurations: false,
+            extensions: [[
+                                 $class: 'PreBuildMerge',
+                                 options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'recursive', mergeTarget: git_branch]
+                         ]],
+            submoduleCfg: [],
+            userRemoteConfigs: [[credentialsId: '85572032-4284-4095-9eec-4df70ddfdb68', url: git_repo_url]]
+    ]
+    println "Locally merged $git_base_branch to $git_branch"
+}
+
+def mergeTo(git_branch, git_base_branch, git_repo_url){
+    checkout changelog: false, poll: false, scm: [
+            $class: 'GitSCM',
+            branches: [[name: git_branch]],
+            doGenerateSubmoduleConfigurations: false,
+            extensions: [[
+                                 $class: 'PreBuildMerge',
+                                 options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: git_base_branch]
+                         ]],
+            submoduleCfg: [],
+            userRemoteConfigs: [[credentialsId: '85572032-4284-4095-9eec-4df70ddfdb68', url: git_repo_url]]
+    ]
+    println "Locally merged $git_branch to $git_base_branch"
+}
+
+def gradleWrapper(gradle_command, gradle_string){
+    withEnv(['GRADLE_STRING=' + gradle_string,
+             'GRADLE_COMMAND=' + gradle_command]){
+        sh returnStdout: true, script: '''
+            echo ${GRADLE_COMMAND}
+            echo ${GRADLE_STRING}
+            chmod +x gradlew
+            ./gradlew ${GRADLE_COMMAND} ${GRADLE_STRING}
+        '''
+    }
 }
