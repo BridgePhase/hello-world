@@ -26,17 +26,18 @@ node {
         } finally {
             archive "build/reports/intTest/**"
         }
-        jacoco()
+        jacoco classPattern: '**/build/classes'
     }
-
+    /*
     stage ("Build Image") {
         gradleWrapper("assemble", "--stacktrace")
         def pullSpec = "622865517111.dkr.ecr.us-east-1.amazonaws.com/bridgephase-demo/helloworld:${SERVICE_VERSION}"
         sh returnStdout: false, script: """
         docker build -t ${pullSpec} -f docker/Dockerfile . 
-        //docker push ${pullSpec}
+        docker push ${pullSpec}
         """
     }
+    */
 
     stage ("Merge") {
 
