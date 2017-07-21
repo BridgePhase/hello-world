@@ -19,14 +19,15 @@ node {
             gradleWrapper("test", "--continue --stacktrace")
         } finally {
             archive "build/reports/**"
+            junit '**/build/test-results/test/*.xml'
         }
         printInfo("INT TEST")
         try {
             gradleWrapper("intTest", "--stacktrace")
         } finally {
             archive "build/reports/intTest/**"
+            junit '**/build/test-results/intTest/*.xml'
         }
-        junit allowEmptyResults: true, testResults: '**/build/test-results/**'
         jacoco classPattern: '**/build/classes', exclusionPattern: '**/build/build/classes'
     }
     /*
