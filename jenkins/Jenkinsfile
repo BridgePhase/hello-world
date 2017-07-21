@@ -8,10 +8,12 @@ node {
 
     currentBuild.displayName = GIT_BRANCH + "-"+ env.BUILD_NUMBER
 
+    /*
     stage ("Clone Source Repository") {
         gitClone(GIT_REPO_URL, GIT_BRANCH)
         mergeFrom(GIT_BRANCH, GIT_BASE_BRANCH, GIT_REPO_URL)
     }
+    */
 
     stage ("Test") {
         printInfo("UNIT TEST")
