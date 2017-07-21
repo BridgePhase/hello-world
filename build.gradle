@@ -1,0 +1,121 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.4.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+		maven {
+			url "https://plugins.gradle.org/m2"
+		}
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("com.moowork.gradle:gradle-node-plugin:1.1.1")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'jacoco'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'com.moowork.node'
+
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter-web')
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+node {
+	version = '8.1.2'
+	npmVersion = '5.0.3'
+	nodeModulesDir = file('frontend')
+	download = true
+}
+
+jar {
+	baseName = 'app'
+}
+
+task buildClientDev(type: NpmTask, dependsOn: 'npmInstall') {
+	group = 'build'
+	description = 'Compile client side assets for development'
+	args = ['run', 'buildDev']
+}
+
+task buildClient(type: NpmTask, dependsOn: 'npmInstall') {
+	group = 'build'
+	description = 'Compile client side assets for production'
+	args = ['run', 'build']
+}
+
+task buildClientWatch(type: NpmTask, dependsOn: 'npmInstall') {
+	group = 'application'
+	description = 'Compile client side assets for rebuilding'
+	args = ['run', 'buildWatch']
+}
+
+bootRun.dependsOn(buildClientDev)
+
+jar.dependsOn(buildClient)
+
+jacocoTestReport {
+	reports {
+		xml.enabled true
+		xml.destination = file("${buildDir}/reports/jacoco.xml")
+		html.destination = file("${buildDir}/reports/jacocoHtml")
+	}
+	afterEvaluate {
+		classDirectories = files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'com/bridgephase/helloworld/HelloworldApplication.java' // the main application, no coverage required
+			])
+		})
+	}
+}
+
+sourceSets {
+	intTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+		}
+	}
+}
+
+configurations {
+	intTestCompile.extendsFrom testCompile
+	intTestRuntime.extendsFrom testRuntime
+}
+
+/*******************************************
+ *
+ * [ Test ]
+ *
+ *******************************************/
+test {
+	jacoco {
+		append = false
+		destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+		classDumpDir = file("$buildDir/build/classes/test")
+	}
+	finalizedBy jacocoTestReport
+}
+task intTest(type:Test){
+	description = "Run integration tests (located in src/intTest/...). These tests make Java service layer calls to emulate service interactions."
+	testClassesDirs = project.sourceSets.intTest.output.classesDirs.getAsFileTree()
+	classpath = project.sourceSets.intTest.runtimeClasspath
+	reports.html.destination = file('build/reports/intTest/')
+	jacoco {
+		append = true
+		destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+		classDumpDir = file("$buildDir/build/classes/intTest")
+	}
+	finalizedBy jacocoTestReport
+}
+
