@@ -26,7 +26,7 @@ node {
         } finally {
             archive "build/reports/intTest/**"
         }
-        jacoco classPattern: '**/build/classes'
+        jacoco classPattern: '**/build/classes', exclusionPattern: '**/build/build/classes'
     }
     /*
     stage ("Build Image") {
