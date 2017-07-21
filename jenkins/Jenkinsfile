@@ -1,0 +1,25 @@
+node {
+    printInfo("START BUILD")
+
+    stage ("Clone Source Repository") {
+
+    }
+
+    stage ("Test") {
+
+    }
+
+    stage ("Merge") {
+
+    }
+
+    stage ("Deploy") {
+
+    }
+
+    printInfo("START BUILD")
+}
+
+def printInfo(text) {
+    println "[ INFO ] --> " + text
+}
