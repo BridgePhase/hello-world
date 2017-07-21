@@ -65,7 +65,7 @@ def mergeFrom(git_branch, git_base_branch, git_repo_url){
                                  options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'recursive', mergeTarget: git_branch]
                          ]],
             submoduleCfg: [],
-            userRemoteConfigs: [[credentialsId: '85572032-4284-4095-9eec-4df70ddfdb68', url: git_repo_url]]
+            userRemoteConfigs: [[credentialsId: 'jenkins-user-ssh', url: git_repo_url]]
     ]
     println "Locally merged $git_base_branch to $git_branch"
 }
@@ -80,7 +80,7 @@ def mergeTo(git_branch, git_base_branch, git_repo_url){
                                  options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: git_base_branch]
                          ]],
             submoduleCfg: [],
-            userRemoteConfigs: [[credentialsId: '85572032-4284-4095-9eec-4df70ddfdb68', url: git_repo_url]]
+            userRemoteConfigs: [[credentialsId: 'jenkins-user-ssh', url: git_repo_url]]
     ]
     println "Locally merged $git_branch to $git_base_branch"
 }
