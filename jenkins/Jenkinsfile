@@ -28,7 +28,7 @@ node {
             archive "build/reports/intTest/**"
             junit '**/build/test-results/intTest/*.xml'
         }
-        jacoco classPattern: '**/build/classes', exclusionPattern: '**/build/build/classes'
+        jacoco classPattern: '**/build/classes', exclusionPattern: '**/build/out/**'
     }
     /*
     stage ("Build Image") {
