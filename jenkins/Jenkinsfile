@@ -4,7 +4,7 @@ def SERVICE_VERSION = "1.0." + env.BUILD_NUMBER
 node {
     printInfo("START BUILD")
 
-    currentBuild.displayName = env.GIT_BRANCH + "-"+ env.BUILD_NUMBER
+    currentBuild.displayName = ${GIT_BRANCH} + "-"+ env.BUILD_NUMBER
 
     stage ("Test") {
         printInfo("UNIT TEST")
