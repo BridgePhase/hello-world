@@ -42,7 +42,11 @@ node {
     */
 
     stage ("Merge") {
-
+        mergeFrom(GIT_BRANCH, GIT_BASE_BRANCH, GIT_REPO_URL)
+    }
+    
+    stage ("Version") {
+        tagAndPush(GIT_BASE_BRANCH, GIT_REPO_URL)
     }
 
     stage ("Deploy") {
@@ -70,7 +74,7 @@ def gitClone(git_repo_url, git_branch) {
     ]
 }
 
-def mergeFrom(git_branch, git_base_branch, git_repo_url){
+def mergeFrom(git_branch, git_base_branch, git_repo_url) {
     checkout changelog: false, poll: false, scm: [
             $class: 'GitSCM',
             branches: [[name: git_base_branch]],
@@ -85,7 +89,7 @@ def mergeFrom(git_branch, git_base_branch, git_repo_url){
     println "Locally merged $git_base_branch to $git_branch"
 }
 
-def mergeTo(git_branch, git_base_branch, git_repo_url){
+def mergeTo(git_branch, git_base_branch, git_repo_url) {
     checkout changelog: false, poll: false, scm: [
             $class: 'GitSCM',
             branches: [[name: git_branch]],
@@ -98,6 +102,18 @@ def mergeTo(git_branch, git_base_branch, git_repo_url){
             userRemoteConfigs: [[credentialsId: 'jenkins-user-ssh', url: git_repo_url]]
     ]
     println "Locally merged $git_branch to $git_base_branch"
+}
+
+def tagAndPush(git_branch, git_repo_url) {
+    withEnv(['BUILD_NUMBER=' + env.BUILD_NUMBER,
+             'GIT_BRANCH=' + git_branch,
+             'GIT_REPO_URL=' + git_repo_url]) {
+        sh returnStdout: true, script: '''
+            git tag -a -f -m "Jenkins Build #${BUILD_NUMBER}" jenkins-merge-${BUILD_NUMBER}
+            git push ${GIT_REPO_URL} HEAD:${GIT_BRANCH}
+        '''
+    }
+    println "Pushed $git_branch to repository"
 }
 
 def gradleWrapper(gradle_command, gradle_string){
