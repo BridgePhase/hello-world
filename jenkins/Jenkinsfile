@@ -34,7 +34,7 @@ node {
     stage ("Build Image") {
         gradleWrapper("assemble", "--stacktrace")
         def pullSpec = "622865517111.dkr.ecr.us-east-1.amazonaws.com/bridgephase-demo/helloworld:${SERVICE_VERSION}"
-        def login_cmd = sh(returnStdout: true, script: 'aws ecr get-login --no-include-email --region us-east-1')
+        def login_cmd = sh(returnStdout: true, script: 'aws ecr get-login --region us-east-1')
         sh returnStdout: true, script: """
         ${login_cmd}
         docker build -t ${pullSpec} -f docker/Dockerfile . 
