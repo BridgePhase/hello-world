@@ -21,37 +21,72 @@ Take a tour!
 
 ## Table of contents
 
-- [Running Locally](#run-locally)
+- [About](#about)
 - [AWS Infrastructure](#aws)	 
 - [CI/CD](#ci-cd)
-    - [Continuous Integration](#continuous-integration)
-    - [Continous Delivery](#continuous-delivery)
 - [Tests](#tests)
 
-## Running Locally
+## <a name="about"></a>About
+
+### Overview
+This is a single page application that utilizes the latest version of Angular to perform a single HTTP request to a REST endpoint exposed by a Tomcat server embedded within a Spring Boot JAR that runnig in a Docker container on an EC2 instance within an ECS cluster.
+
+We could have simply served a static web page with no REST call but who wants to read about that?
+
+### Running Locally
 Be up and running in three steps:   
 1. `git clone git@github.com:BridgePhase/hello-world.git`   
 2. `cd hello-world`   
 3. `./gradlew bootRun`   
 
-## AWS Infrastructure
+## <a name="aws"></a>AWS Infrastructure   
+All of the computing, networking, and storage resources that are used to build, test, deploy, and host this application are provided by AWS. Specific resources include: 
 
-- Cloud Formation
-- EC2
-- ELB
-- EC2 Container Registry
-- EC2 Container Service
-- IAM
-- Route 53
-- S3
+### Cloud Formation   
+Cloud Formation is a flexible and powerful way to manage Infrastructure as code (IaC). All infrastructure needed for the Jenkins stack was created using a single Cloud Formation Template.   
 
-## CI/CD
+[View the template.](https://github.com/BridgePhase/hello-world/blob/master/cloud_formation/jenkins-resources.json)   
+
+### Elastic Cloud Compute (EC2)
+Elastic Cloud Compute instances are the backbone of AWS bound applications. Both the Jenkins stack and the ECS cluster are backed by EC2.   
+
+### Elastic Load Balancer (ELB)
+Synchronous decoupling of web requests from resource locations for this application is acheived through the use an Elastic Load Balancer instance. The ELB distributes traffic to EC2 instances within the ECS cluster; allowing for EC2 instances to be created and destroyed without the need for remapping IP addresses or URLs.
+
+### EC2 Container Registry (ECR)
+Docker images utilized by ECS for the Hello World app are stored in an ECR repository. ECR provides seamless integration with ECS in addition to compatibility with standard Docker push/pull specifications.
+
+*pull spec -->*`<...>/bridgephase-demo/helloworld:<tag>`
+
+### EC2 Container Service (ECS)
+Container orchestration is acheived through ECS. A cluster, service, and task definitions are used to manage deployments, scaling, and versions of the containerized application.
+
+### Identity & Access Management (IAM)
+Access to infrastructure for the application and Jenkins is managed through IAM groups, users, and roles. [AWS security best practices](https://aws.amazon.com/whitepapers/aws-security-best-practices/) are utilized to ensure that resources are accessed and exposed securely. VPC subnets are private by default and only made public for external facing resources.
+
+### Route 53
+The `bridgephase-demo.com` domain name is registered and maintained through Route 53. Route 53 record sets are utilized for the `jenkins` and `helloworld` subdomains.
+
+#### Simple Storage Service (S3)
+Jenkins backups are stored in a dedicated S3 bucket. The S3 bucket reference is specified in the [Jenkins Cloud Formation Template](https://github.com/BridgePhase/hello-world/blob/master/cloud_formation/jenkins-resources.json).
+
+## <a name="ci-cd"></a>CI/CD
+Git, Gradle, Jenkins, and the AWS CLI are all utilized to automate the integration of new code into the master branch of the repository as well as the automated deployment of newly integrated code.
 
 ### Continuous Integration
+Code changes are integrated with the master branch after undergoing automated testing and quality checks. Automated CI steps for this project include:
+* SCM checkout from Github
+* Compilation of source code and resources
+* Automated testing (unit, integration, client) and code coverage reporting
+* Git tagging, merging, and pushing of newly integration changes
 
 ### Continuous Delivery
+Automated CD steps for this project include:
+* Docker image builds, tags, and pushes
+* ECS task definition registration through the AWS CLI and Cloud Formation Templates
+* ECS deployments of newly pushed containers through the AWS CLI
 
-## Tests
+## <a name="tests"></a>Tests
 Automated testing is critical to ensuring that an application remains production ready at all times. Well written
 tests with high code coverage empower developers to deliver new functionality early and often by ensuring that
 all aspects of the application are working as intended. This application utilizes a combination of unit, 
@@ -60,11 +95,6 @@ integration, and client testing.
 ### Running the Tests
 - Unit Tests --> `./gradlew test`
 - Integration Tests --> `./gradlew intTest`
-- Client Tests --> `??`
+- Client Tests --> `! TODO: Test tests exist but need cleaned up and executed on the pipelie.`
 
-Or, to build the app and run all of the tests in a single step --> `./gradlew clean build`
-
-## Links
-Take a tour!
-- [Deployed App](http://helloworld.bridgephase-demo.com)
-- [CI/CD Pipeline](http://jenkins.bridgephase-demo.com)
+Alternatively, to build the app and run all of the tests in a single step --> `./gradlew clean build`
