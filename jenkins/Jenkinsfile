@@ -16,10 +16,16 @@ node {
 
     stage ("Deploy") {
             withEnv(['SERVICE_VERSION=' + SERVICE_VERSION]) {
-                def taskDefJson = sh returnStdout: true, script: '''
-                cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/'
+                def taskDefArn = sh returnStdout: true, script: '''
+                cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/' | grep "taskDefinitionArn"
                 '''
-                printInfo(taskDefJson)
+                def createdTaskDefJson = sh returnStdout: true, script: """
+                    aws ecs register-task-definition --cli-input-json ${taskDefJson}
+                """
+                printInfo(createdTaskDefJson)
+                //"taskDefinitionArn":
+
+
             }
         }
     error("TESTING")
