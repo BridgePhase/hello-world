@@ -52,10 +52,17 @@ node {
     }
 
     stage ("Deploy") {
-        def taskDefJson = sh returnStdout: true, script: """
-        cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/'
-        """
-        printInfo(taskDefJson)
+        withEnv(['SERVICE_VERSION=' + SERVICE_VERSION]) {
+            def taskDefJson = sh returnStdout: true, script: '''
+            cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/' > build/taskDef.json
+            '''
+
+            def createdTaskDefJson = sh returnStdout: true, script: '''
+            aws ecs register-task-definition --cli-input-json file://$PWD/build/taskDef.json
+            '''
+            printInfo(createdTaskDefJson)
+            //"taskDefinitionArn":
+        }
     }
 
     printInfo("START BUILD")
