@@ -31,7 +31,7 @@ node {
         jacoco classPattern: '**/build/classes', exclusionPattern: '**/build/out/**'
     }
 
-    stage ("Build Image") {
+    stage ("Build And Push Image") {
         gradleWrapper("assemble", "--stacktrace")
         def pullSpec = "622865517111.dkr.ecr.us-east-1.amazonaws.com/bridgephase-demo/helloworld:${SERVICE_VERSION}"
         def login_cmd = sh(returnStdout: true, script: 'aws ecr get-login --region us-east-1')
@@ -52,7 +52,8 @@ node {
     }
 
     stage ("Deploy") {
-
+        def taskDefJson = sh(returnStdout: true, script: 'cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/'')
+        printInfo(taskDefJson)
     }
 
     printInfo("START BUILD")
