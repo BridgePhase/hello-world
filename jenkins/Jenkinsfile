@@ -52,7 +52,9 @@ node {
     }
 
     stage ("Deploy") {
-        def taskDefJson = sh(returnStdout: true, script: 'cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/'')
+        def taskDefJson = sh returnStdout: true, script: """
+        cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/'
+        """
         printInfo(taskDefJson)
     }
 
