@@ -58,7 +58,7 @@ node {
             '''
 
             def createdTaskDefJson = sh returnStdout: true, script: '''
-            aws ecs register-task-definition --cli-input-json file://$PWD/build/taskDef.json
+            aws ecs register-task-definition --cli-input-json file://$PWD/build/taskDef.json | grep "taskDefinitionArn"
             '''
             printInfo(createdTaskDefJson)
             //"taskDefinitionArn":
