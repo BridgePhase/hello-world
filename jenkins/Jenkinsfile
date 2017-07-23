@@ -110,7 +110,7 @@ def tagAndPush(git_branch, git_repo_url) {
              'GIT_REPO_URL=' + git_repo_url]) {
         sh returnStdout: true, script: '''
             git tag -a -f -m "Jenkins Build #${BUILD_NUMBER}" jenkins-merge-${BUILD_NUMBER}
-            git push ${GIT_REPO_URL} HEAD:${GIT_BRANCH}
+            git -c core.askpass=true push ${GIT_REPO_URL} HEAD:${GIT_BRANCH}
         '''
     }
     println "Pushed $git_branch to repository"
