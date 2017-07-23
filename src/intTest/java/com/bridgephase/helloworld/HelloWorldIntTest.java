@@ -8,7 +8,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -21,6 +21,6 @@ public class HelloWorldIntTest {
     public void testMessageEndpoint() throws Exception {
         ResponseEntity<String> response = restTemplate.getForEntity("/message", String.class);
         String message = response.getBody();
-        assertEquals("Hello World!!", message);
+        assertTrue(message.contains("Hello World!!"));
     }
 }

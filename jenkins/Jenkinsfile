@@ -1,0 +1,129 @@
+def GIT_REPO_URL = "git@github.com:BridgePhase/hello-world.git"
+def GIT_BASE_BRANCH = "master"
+def GIT_BRANCH = "CI-DEV"
+def SERVICE_VERSION = "1.0." + env.BUILD_NUMBER
+
+node {
+    printInfo("START BUILD")
+
+    currentBuild.displayName = GIT_BRANCH + "-"+ SERVICE_VERSION
+
+    stage ("Clone Source Repository") {
+        gitClone(GIT_REPO_URL, GIT_BRANCH)
+        mergeFrom(GIT_BRANCH, GIT_BASE_BRANCH, GIT_REPO_URL)
+    }
+
+    stage ("Test") {
+        printInfo("UNIT TEST")
+        try {
+            gradleWrapper("test", "--continue --stacktrace")
+        } finally {
+            archive "build/reports/**"
+            junit '**/build/test-results/test/*.xml'
+        }
+        printInfo("INT TEST")
+        try {
+            gradleWrapper("intTest", "--stacktrace")
+        } finally {
+            archive "build/reports/intTest/**"
+            junit '**/build/test-results/intTest/*.xml'
+        }
+        jacoco classPattern: '**/build/classes', exclusionPattern: '**/build/out/**'
+    }
+    /*
+    stage ("Build Image") {
+        gradleWrapper("assemble", "--stacktrace")
+        def pullSpec = "622865517111.dkr.ecr.us-east-1.amazonaws.com/bridgephase-demo/helloworld:${SERVICE_VERSION}"
+        sh returnStdout: false, script: """
+        docker build -t ${pullSpec} -f docker/Dockerfile . 
+        docker push ${pullSpec}
+        """
+    }
+    */
+
+    stage ("Merge") {
+        mergeTo(GIT_BRANCH, GIT_BASE_BRANCH, GIT_REPO_URL)
+    }
+    
+    stage ("Version") {
+        tagAndPush(GIT_BASE_BRANCH, GIT_REPO_URL)
+    }
+
+    stage ("Deploy") {
+
+    }
+
+    printInfo("START BUILD")
+}
+
+def printInfo(text) {
+    println "[ INFO ] --> " + text
+}
+
+def gitClone(git_repo_url, git_branch) {
+    checkout changelog: false, poll: false, scm: [
+            $class: 'GitSCM',
+            branches: [[name: git_branch]],
+            doGenerateSubmoduleConfigurations: false,
+            extensions: [[$class: 'WipeWorkspace']],
+            submoduleCfg: [],
+            userRemoteConfigs: [[
+                    credentialsId: 'jenkins-user-ssh',
+                    url: git_repo_url
+            ]]
+    ]
+}
+
+def mergeFrom(git_branch, git_base_branch, git_repo_url) {
+    checkout changelog: false, poll: false, scm: [
+            $class: 'GitSCM',
+            branches: [[name: git_base_branch]],
+            doGenerateSubmoduleConfigurations: false,
+            extensions: [[
+                                 $class: 'PreBuildMerge',
+                                 options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'recursive', mergeTarget: git_branch]
+                         ]],
+            submoduleCfg: [],
+            userRemoteConfigs: [[credentialsId: 'jenkins-user-ssh', url: git_repo_url]]
+    ]
+    println "Locally merged $git_base_branch to $git_branch"
+}
+
+def mergeTo(git_branch, git_base_branch, git_repo_url) {
+    checkout changelog: false, poll: false, scm: [
+            $class: 'GitSCM',
+            branches: [[name: git_branch]],
+            doGenerateSubmoduleConfigurations: false,
+            extensions: [[
+                                 $class: 'PreBuildMerge',
+                                 options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: git_base_branch]
+                         ]],
+            submoduleCfg: [],
+            userRemoteConfigs: [[credentialsId: 'jenkins-user-ssh', url: git_repo_url]]
+    ]
+    println "Locally merged $git_branch to $git_base_branch"
+}
+
+def tagAndPush(git_branch, git_repo_url) {
+    withEnv(['BUILD_NUMBER=' + env.BUILD_NUMBER,
+             'GIT_BRANCH=' + git_branch,
+             'GIT_REPO_URL=' + git_repo_url]) {
+        sh returnStdout: true, script: '''
+            git tag -a -f -m "Jenkins Build #${BUILD_NUMBER}" jenkins-merge-${BUILD_NUMBER}
+            git -c core.askpass=true push ${GIT_REPO_URL} HEAD:${GIT_BRANCH}
+        '''
+    }
+    println "Pushed $git_branch to repository"
+}
+
+def gradleWrapper(gradle_command, gradle_string){
+    withEnv(['GRADLE_STRING=' + gradle_string,
+             'GRADLE_COMMAND=' + gradle_command]){
+        sh returnStdout: true, script: '''
+            echo ${GRADLE_COMMAND}
+            echo ${GRADLE_STRING}
+            chmod +x gradlew
+            ./gradlew ${GRADLE_COMMAND} ${GRADLE_STRING}
+        '''
+    }
+}
