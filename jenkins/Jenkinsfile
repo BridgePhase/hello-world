@@ -20,6 +20,8 @@ node {
                 cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/'
                 '''
                 printInfo(taskDefJson)
+                taskDefJson = taskDefJson.trim().replaceAll("\n ", "")
+                printInfo(taskDefJson)
 
                 def createdTaskDefJson = sh returnStdout: true, script: """
                     aws ecs register-task-definition --cli-input-json ${taskDefJson}
