@@ -56,12 +56,22 @@ node {
             def taskDefJson = sh returnStdout: true, script: '''
             cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/' > build/taskDef.json
             '''
-
+            printInfo("Registering a new task definition.")
             def createdTaskDefJson = sh returnStdout: true, script: '''
             aws ecs register-task-definition --cli-input-json file://$PWD/build/taskDef.json | grep "taskDefinitionArn"
             '''
-            printInfo(createdTaskDefJson)
-            //"taskDefinitionArn":
+            if (createdTaskDefJson == null || createdTaskDefJson.isEmpty()) {
+                error("The task definition was not created. The deployment has failed.")
+            }
+            def taskDefArn = createdTaskDefJson.replace("\"taskDefinitionArn\": \"", "").replace("\",","")
+            printInfo("The following task definition was created: " + taskDefArn)
+
+            printInfo("Updated the ECS service with the new task definition.")
+
+            def updatedServiceJson = sh returnStdout: true, script: """
+            aws ecs update-service --cluster helloworld-cluster --service helloworld-svc-lb --task-definition ${taskDefArn}
+            """
+            printInfo(updatedServiceJson)
         }
     }
 
