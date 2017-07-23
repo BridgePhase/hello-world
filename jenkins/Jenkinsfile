@@ -42,7 +42,7 @@ node {
     */
 
     stage ("Merge") {
-        mergeFrom(GIT_BRANCH, GIT_BASE_BRANCH, GIT_REPO_URL)
+        mergeTo(GIT_BRANCH, GIT_BASE_BRANCH, GIT_REPO_URL)
     }
     
     stage ("Version") {
