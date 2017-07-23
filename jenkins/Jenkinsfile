@@ -32,6 +32,7 @@ node {
     }
 
     stage ("Build And Push Image") {
+        sh(returnStdout: false, script: 'chmod -R 777 *')
         gradleWrapper("assemble", "--stacktrace")
         def pullSpec = "622865517111.dkr.ecr.us-east-1.amazonaws.com/bridgephase-demo/helloworld:${SERVICE_VERSION}"
         def login_cmd = sh(returnStdout: true, script: 'aws ecr get-login --region us-east-1')
@@ -71,7 +72,9 @@ node {
             def updatedServiceJson = sh returnStdout: true, script: """
             aws ecs update-service --cluster helloworld-cluster --service helloworld-svc-lb --task-definition ${taskDefArn}
             """
-            printInfo(updatedServiceJson)
+            if (updatedServiceJson == null || updatedServiceJson.isEmpty()) {
+                error("The service definition was not updated. The deployment has failed.")
+            }
         }
     }
 
