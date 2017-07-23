@@ -12,7 +12,7 @@ node {
         gitClone(GIT_REPO_URL, GIT_BRANCH)
         mergeFrom(GIT_BRANCH, GIT_BASE_BRANCH, GIT_REPO_URL)
     }
-
+    /*
     stage ("Test") {
         printInfo("UNIT TEST")
         try {
@@ -50,12 +50,15 @@ node {
     stage ("Version") {
         tagAndPush(GIT_BASE_BRANCH, GIT_REPO_URL, SERVICE_VERSION)
     }
+    */
 
     stage ("Deploy") {
-        def taskDefJson = sh returnStdout: true, script: """
-        cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/'
-        """
-        printInfo(taskDefJson)
+        withEnv(['SERVICE_VERSION=' + SERVICE_VERSION]) {
+            def taskDefJson = sh returnStdout: true, script: '''
+            cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/'
+            '''
+            printInfo(taskDefJson)
+        }
     }
 
     printInfo("START BUILD")
