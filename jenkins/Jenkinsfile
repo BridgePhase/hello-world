@@ -13,24 +13,6 @@ node {
         mergeFrom(GIT_BRANCH, GIT_BASE_BRANCH, GIT_REPO_URL)
     }
 
-
-    stage ("Deploy") {
-            withEnv(['SERVICE_VERSION=' + SERVICE_VERSION]) {
-                def taskDefJson = sh returnStdout: true, script: '''
-                cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/' > build/taskDef.json
-                '''
-
-                def createdTaskDefJson = sh returnStdout: true, script: """
-                    aws ecs register-task-definition --cli-input-json file://$PWD/build/taskDef.json
-                """
-                printInfo(createdTaskDefJson)
-                //"taskDefinitionArn":
-
-
-            }
-        }
-    error("TESTING")
-
     stage ("Test") {
         printInfo("UNIT TEST")
         try {
@@ -72,9 +54,14 @@ node {
     stage ("Deploy") {
         withEnv(['SERVICE_VERSION=' + SERVICE_VERSION]) {
             def taskDefJson = sh returnStdout: true, script: '''
-            cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/'
+            cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/' > build/taskDef.json
             '''
-            printInfo(taskDefJson)
+
+            def createdTaskDefJson = sh returnStdout: true, script: '''
+            aws ecs register-task-definition --cli-input-json file://$PWD/build/taskDef.json
+            '''
+            printInfo(createdTaskDefJson)
+            //"taskDefinitionArn":
         }
     }
 
