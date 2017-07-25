@@ -1,6 +1,7 @@
 node {
     stage("Deploy") {
         currentBuild.displayName = SERVICE_VERSION
+        gitClone()
         withEnv(['SERVICE_VERSION=' + SERVICE_VERSION]) {
             sh(returnStdout: true, script: 'mkdir build')
             def taskDefJson = sh returnStdout: true, script: '''
@@ -27,6 +28,20 @@ node {
             }
         }
     }
+}
+
+def gitClone() {
+    checkout changelog: false, poll: false, scm: [
+            $class: 'GitSCM',
+            branches: [[name: 'master']],
+            doGenerateSubmoduleConfigurations: false,
+            extensions: [[$class: 'WipeWorkspace']],
+            submoduleCfg: [],
+            userRemoteConfigs: [[
+                                        credentialsId: 'jenkins-user-ssh',
+                                        url: 'git@github.com:BridgePhase/hello-world.git'
+                                ]]
+    ]
 }
 
 def printInfo(text) {
