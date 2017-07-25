@@ -1,0 +1,24 @@
+{
+    "volumes" : [],
+    "family" : "helloworld",
+    "networkMode" : "bridge",
+    "containerDefinitions" : [
+        {
+            "name": "helloworld",
+            "image": "622865517111.dkr.ecr.us-east-1.amazonaws.com/bridgephase-demo/helloworld:X_VERSION_X",
+            "cpu": 0,
+            "memory": 400,
+            "portMappings": [
+                {
+                    "containerPort": 8080,
+                    "hostPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": []
+        }
+    ]
+}
