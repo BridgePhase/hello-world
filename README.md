@@ -35,13 +35,13 @@ We could have simply served a static web page with no REST call but who wants to
     
 __The application is highly available__. The ECS cluster contains EC2 instances running in separate availability zones (AZ). If hardware fails or an an issue arises in one availability zone the application containues to service requests in the other AZ.
 
-##### Automation
+#### Automation
 __Automation is critical__ to delivering new functionality quickly and reliably. The DevOps model utilzied for this application includes a fully automated solution that allows changes to be deployed to the AWS cloud in a matter of minutes __with zero service interruption__ thanks to the use of load balancing and ECS.  
 ![automation-flow](https://user-images.githubusercontent.com/10728023/28594276-62a0d0c4-715d-11e7-86b0-4f5c4c0c4118.png)
 
-##### Worklow
+#### Worklow
 1. Commit to the CI-DEV branch either locally or through pull request.
-2. Github webhooks send publish the event to Jenkins.
+2. Github webhooks publish the event to Jenkins.
 3. A [Git webhook job](http://jenkins.bridgephase-demo.com/job/helloworld-ci-githook/) receives the event and triggers a [CI job](http://jenkins.bridgephase-demo.com/job/helloworld-ci-pipeline/).
 4. The Jenkins job:   
 	a. Builds the app   
@@ -114,6 +114,5 @@ integration, and client testing.
 ### Running the Tests
 - Unit Tests --> `./gradlew test`
 - Integration Tests --> `./gradlew intTest`
-- Client Tests --> `! TODO: Test tests exist but need cleaned up and executed on the pipelie.`
 
 Alternatively, to build the app and run all of the tests in a single step --> `./gradlew clean build`
