@@ -39,7 +39,8 @@ public class MessageControllerTest {
     @Test
     public void testTetMessage() throws Exception {
         String expectedMessage = "hello-from-test";
-        when(messageService.createMessage()).thenReturn(new Message(expectedMessage));
+        String expectedVersion = "v1.0";
+        when(messageService.createMessage()).thenReturn(new Message(expectedMessage, expectedVersion));
 
         MvcResult result = mockMvc.perform(get("/message").
                 accept(MediaType.APPLICATION_JSON)).
@@ -50,6 +51,7 @@ public class MessageControllerTest {
         assertNotNull(result);
         String json = result.getResponse().getContentAsString();
         assertTrue(json.contains(expectedMessage));
+        assertTrue(json.contains(expectedVersion));
     }
 
     @Test
@@ -64,16 +66,6 @@ public class MessageControllerTest {
         assertNotNull(result);
         String json = result.getResponse().getContentAsString();
         assertTrue(json.contains(expected));
-    }
-
-    @Test
-    public void testVersion() throws Exception {
-        String expected = "version1";
-        ReflectionTestUtils.setField(unitUnderTest, "version", expected);
-
-        String actual = unitUnderTest.version();
-
-        assertEquals(expected, actual);
     }
 
 }

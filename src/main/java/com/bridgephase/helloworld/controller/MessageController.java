@@ -16,9 +16,6 @@ public class MessageController {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageController.class);
 
-    @Value("${service.version}")
-    private String version;
-
     @Autowired
     private MessageService messageService;
 
@@ -35,10 +32,5 @@ public class MessageController {
         return "OK";
     }
 
-    @CrossOrigin
-    @RequestMapping(value = "/version", method = RequestMethod.GET)
-    public String version() {
-        return version;
-    }
 
 }

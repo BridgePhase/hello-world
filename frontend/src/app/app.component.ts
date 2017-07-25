@@ -9,6 +9,7 @@ import {MessageService} from "./message.service";
 export class AppComponent implements OnInit {
 
   message: string;
+  version: string;
 
   constructor(private messageService: MessageService) {}
 
@@ -16,6 +17,7 @@ export class AppComponent implements OnInit {
     this.messageService.fetchMessage().subscribe(
       (response) => {
         this.message = response['text'];
+        this.version = response['version'];
       },
       (error) => {
         console.log("An error occurred." + error);

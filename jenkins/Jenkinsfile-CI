@@ -37,7 +37,7 @@ node {
         def login_cmd = sh(returnStdout: true, script: 'aws ecr get-login --region us-east-1')
         sh returnStdout: true, script: """
         ${login_cmd}
-        docker build -t ${pullSpec} -f docker/Dockerfile . 
+        docker build --build-arg VERSION=${SERVICE_VERSION} -t ${pullSpec} -f docker/Dockerfile .
         docker push ${pullSpec}
         """
     }
