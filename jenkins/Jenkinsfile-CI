@@ -58,7 +58,7 @@ node {
         build job: 'holloworld-deploy',
             wait: false,
             parameters: [
-                string(name: 'SERVICE_VERSION', value: service_version)
+                string(name: 'SERVICE_VERSION', value: SERVICE_VERSION)
             ]
     }
 
