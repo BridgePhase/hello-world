@@ -33,7 +33,8 @@ node {
 
     stage ("Build And Push Image") {
         sh(returnStdout: false, script: 'chmod -R 777 *')
-        gradleWrapper("assemble", "--stacktrace")
+        gradleWrapper("clean assemble", "--stacktrace")
+        sh(returnStdout: false, script: 'chmod -R 777 *')
         def pullSpec = "622865517111.dkr.ecr.us-east-1.amazonaws.com/bridgephase-demo/helloworld:${SERVICE_VERSION}"
         def login_cmd = sh(returnStdout: true, script: 'aws ecr get-login --region us-east-1')
         sh returnStdout: true, script: """
@@ -53,29 +54,12 @@ node {
     }
 
     stage ("Deploy") {
-        withEnv(['SERVICE_VERSION=' + SERVICE_VERSION]) {
-            def taskDefJson = sh returnStdout: true, script: '''
-            cat cloud_formation/ecs-task-definition.json | sed 's/X_VERSION_X/'"$SERVICE_VERSION"'/' > build/taskDef.json
-            '''
-            printInfo("Registering a new task definition.")
-            def createdTaskDefJson = sh returnStdout: true, script: '''
-            aws ecs register-task-definition --cli-input-json file://$PWD/build/taskDef.json | grep "taskDefinitionArn"
-            '''
-            if (createdTaskDefJson == null || createdTaskDefJson.isEmpty()) {
-                error("The task definition was not created. The deployment has failed.")
-            }
-            def taskDefArn = createdTaskDefJson.replace("\"taskDefinitionArn\": \"", "").replace("\",","")
-            printInfo("The following task definition was created: " + taskDefArn)
-
-            printInfo("Updated the ECS service with the new task definition.")
-
-            def updatedServiceJson = sh returnStdout: true, script: """
-            aws ecs update-service --cluster helloworld-cluster --service helloworld-svc-lb --task-definition ${taskDefArn}
-            """
-            if (updatedServiceJson == null || updatedServiceJson.isEmpty()) {
-                error("The service definition was not updated. The deployment has failed.")
-            }
-        }
+        printInfo("Triggering deployment job.")
+        build job: 'holloworld-deploy',
+            wait: false,
+            parameters: [
+                string(name: 'SERVICE_VERSION', value: service_version)
+            ]
     }
 
     printInfo("START BUILD")
