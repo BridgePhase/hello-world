@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MessageService {
 
-    private static final String MESSAGE = "Hello World!!";
+    private static final String MESSAGE = "Hello World!! - Matt";
     private static final Logger logger = LoggerFactory.getLogger(MessageService.class);
 
     @Value("${service.version}")
