@@ -32,9 +32,7 @@ node {
     }
 
     stage ("Build And Push Image") {
-        sh(returnStdout: false, script: 'chmod -R 777 *')
-        gradleWrapper("clean assemble", "--stacktrace")
-        sh(returnStdout: false, script: 'chmod -R 777 *')
+        gradleWrapper("clean buildClient assemble", "--stacktrace")
         def pullSpec = "622865517111.dkr.ecr.us-east-1.amazonaws.com/bridgephase-demo/helloworld:${SERVICE_VERSION}"
         def login_cmd = sh(returnStdout: true, script: 'aws ecr get-login --region us-east-1')
         sh returnStdout: true, script: """
@@ -43,7 +41,6 @@ node {
         docker push ${pullSpec}
         """
     }
-
 
     stage ("Merge") {
         mergeTo(GIT_BRANCH, GIT_BASE_BRANCH, GIT_REPO_URL)
@@ -55,7 +52,7 @@ node {
 
     stage ("Deploy") {
         printInfo("Triggering deployment job.")
-        build job: 'holloworld-deploy',
+        build job: 'helloworld-deploy',
             wait: false,
             parameters: [
                 string(name: 'SERVICE_VERSION', value: SERVICE_VERSION)
