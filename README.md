@@ -1,6 +1,8 @@
 <h1 align="center">
   <br>
-  <a href="http://bridgephase.com/images/bridgephase.svg" alt="logo" width="200"></a>
+  <p align="center">
+    <img src="https://user-images.githubusercontent.com/10728023/35013746-57c91e78-fadc-11e7-959b-619355e625c4.png"/>
+  </p>
   <br>
   <br>
   Hello World!!
