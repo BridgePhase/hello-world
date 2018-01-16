@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="http://www.bridgephase.com/"><img src="http://www.bridgephase.com/wp-content/themes/bridgephase/images/logo.png" alt="logo" width="200"></a>
+  <a href="https://user-images.githubusercontent.com/10728023/35013746-57c91e78-fadc-11e7-959b-619355e625c4.png" alt="logo" width="200"></a>
   <br>
   <br>
   Hello World!!
