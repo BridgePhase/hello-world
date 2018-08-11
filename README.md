@@ -15,11 +15,7 @@
 Take a tour!
 
 <a href="http://helloworld.bridgephase-demo.com">Application</a>
-|
-<a href="https://jenkins.bridgephase-demo.com">CI/CD Pipeline</a>
 </h5>
-
-[![Build Status](https://jenkins.bridgephase-demo.com/buildStatus/icon?job=helloworld-ci-pipeline)](shttp://jenkins.bridgephase-demo.com/job/helloworld-ci-pipeline)
 
 ## Table of contents
 
