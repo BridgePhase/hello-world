@@ -11,12 +11,6 @@
 
 <h4 align="center">A sample REST application powered by Angular 4 + Spring Boot that is built, tested, and deployed in the AWS cloud with Docker containers using <a href="https://aws.amazon.com/ecs/">ECS</a>.</h4>
 
-<h5 align="center">
-Take a tour!
-
-<a href="http://helloworld.bridgephase-demo.com">Application</a>
-</h5>
-
 ## Table of contents
 
 - [About](#about)
